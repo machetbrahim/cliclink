@@ -1,0 +1,25 @@
+{
+  "name": "drivelink",
+  "version": "1.0.0",
+  "description": "مقصّر روابط Google Drive مع تتبع النقرات",
+  "main": "api/server.js",
+  "scripts": {
+    "start": "node api/server.js",
+    "dev": "nodemon api/server.js",
+    "setup": "mkdir -p db && node -e \"require('./api/server')\"",
+    "test": "echo \"No tests configured\" && exit 0"
+  },
+  "keywords": ["url-shortener", "google-drive", "link-tracker"],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "better-sqlite3": "^9.4.3",
+    "express": "^4.18.3",
+    "express-rate-limit": "^7.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}

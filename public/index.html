@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DriveLink — مقصّر روابط Google Drive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="noise"></div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">
+      <span class="logo-icon">⬡</span>
+      <span class="logo-text">DriveLink</span>
+    </div>
+    <nav class="nav">
+      <button class="nav-btn active" data-tab="shorten">تقصير رابط</button>
+      <button class="nav-btn" data-tab="dashboard">لوحة التحكم</button>
+    </nav>
+  </header>
+
+  <!-- Shorten Tab -->
+  <main id="tab-shorten" class="tab active">
+    <section class="hero">
+      <div class="hero-badge">Google Drive · مخصص</div>
+      <h1 class="hero-title">روابط أقصر<br /><span class="accent">وأذكى</span></h1>
+      <p class="hero-sub">قصّر روابط Google Drive وتتبّع كل نقرة بدقة</p>
+    </section>
+
+    <section class="shorten-card">
+      <div class="input-group">
+        <label class="input-label">رابط Google Drive</label>
+        <div class="input-row">
+          <input
+            id="longUrl"
+            type="url"
+            class="url-input"
+            placeholder="https://drive.google.com/file/d/..."
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button id="shortenBtn" class="shorten-btn">
+            <span class="btn-text">قصّر</span>
+            <span class="btn-loader hidden">⟳</span>
+          </button>
+        </div>
+        <div id="urlError" class="error-msg hidden"></div>
+      </div>
+
+      <div class="options-row">
+        <div class="option-group">
+          <label class="option-label">اسم مخصص (اختياري)</label>
+          <div class="slug-row">
+            <span class="slug-prefix" id="baseUrlDisplay">drivelink.io/</span>
+            <input id="customSlug" type="text" class="slug-input" placeholder="مثال: ملف-مشروع" />
+          </div>
+        </div>
+        <div class="option-group">
+          <label class="option-label">تنتهي في</label>
+          <select id="expiry" class="select-input">
+            <option value="">لا تنتهي</option>
+            <option value="1">يوم واحد</option>
+            <option value="7">أسبوع</option>
+            <option value="30">شهر</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="result" class="result hidden">
+        <div class="result-header">
+          <span class="result-badge">✓ تم الإنشاء</span>
+        </div>
+        <div class="result-url-row">
+          <span id="shortUrlDisplay" class="short-url-text"></span>
+          <button id="copyBtn" class="copy-btn" title="نسخ">⧉</button>
+          <a id="openBtn" class="open-btn" target="_blank" title="فتح">↗</a>
+        </div>
+        <div class="result-meta">
+          <span id="resultExpiry"></span>
+        </div>
+        <div class="qr-section">
+          <canvas id="qrCanvas"></canvas>
+          <button id="downloadQr" class="qr-download-btn">تحميل QR</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recent Links -->
+    <section class="recent-section">
+      <h2 class="section-title">آخر الروابط</h2>
+      <div id="recentLinks" class="links-list"></div>
+    </section>
+  </main>
+
+  <!-- Dashboard Tab -->
+  <main id="tab-dashboard" class="tab">
+    <section class="dash-header">
+      <h2 class="dash-title">لوحة التحكم</h2>
+      <div class="stats-row" id="globalStats">
+        <div class="stat-card">
+          <span class="stat-num" id="totalLinks">0</span>
+          <span class="stat-label">روابط</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num" id="totalClicks">0</span>
+          <span class="stat-label">نقرة</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num" id="activeLinks">0</span>
+          <span class="stat-label">نشطة</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="links-table-section">
+      <div class="table-toolbar">
+        <input id="searchLinks" type="text" placeholder="🔍  بحث..." class="search-input" />
+        <button id="exportBtn" class="export-btn">تصدير CSV</button>
+      </div>
+      <div class="table-wrapper">
+        <table class="links-table">
+          <thead>
+            <tr>
+              <th>الرابط القصير</th>
+              <th>الهدف</th>
+              <th>النقرات</th>
+              <th>آخر نقرة</th>
+              <th>الانتهاء</th>
+              <th>إجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="linksTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Click Detail Modal -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-box">
+      <button class="modal-close" id="modalClose">✕</button>
+      <h3 class="modal-title" id="modalTitle">تفاصيل النقرات</h3>
+      <div class="click-chart-wrap">
+        <canvas id="clickChart"></canvas>
+      </div>
+      <div id="clickList" class="click-list"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
